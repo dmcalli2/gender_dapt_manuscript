@@ -120,4 +120,12 @@ inter_q <- inter_q[, c("Trials", "Sex-treatment interaction rate ratio")]
 knitr::kable(inter_q)
 ```
 
+# Assumptions
 
+The following assumptions were required for this analysis:-
+- Sex-treatment interactions are exchangeable between trials within the same drug-class
+- Sex-specific relative treatment effects are transportable from the clinical trial populations to the target Scottish population
+- For the age-specific analysis that non-collapsability does not importantly affect the age-specific rate ratios
+- Relative treatment effects on MACE are the same as relative treatment effects on cardiovascular death. This assumption is satisfied if cardiovascular deaths are a subset of MACE events and if the following Markov property holds; that conditional on having a MACE event, the risk of a cardiovascular death is similar to that of not having a MACE event.
+- As above except for bleeding events and bleeding deaths
+- That the rate ratio for non-cardiovascular, non-bleeding events is null.
