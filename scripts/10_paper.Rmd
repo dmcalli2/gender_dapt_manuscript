@@ -1,0 +1,293 @@
+---
+title: "Final results, abstract"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+# A Prefix nulling hook.
+## see http://stackoverflow.com/questions/22524822/how-can-i-remove-the-prefix-index-indicator-1-in-knitr-output
+# Make sure to keep the default for normal processing.
+default_output_hook <- knitr::knit_hooks$get("output")
+
+# Output hooks handle normal R console output
+knitr::knit_hooks$set( output = function(x, options) {
+
+  comment <- knitr::opts_current$get("comment")
+  if( is.na(comment) ) comment <- ""
+  can_null <- grepl( paste0( comment, "\\s*\\[\\d?\\]" ),
+                     x, perl = TRUE)
+  do_null <- isTRUE( knitr::opts_current$get("null_prefix") )
+  if( can_null && do_null ) {
+    # By default R print output aligns at the right brace.
+    align_index <- regexpr( "\\]", x )[1] - 1
+    # Two cases: start or newline
+    re <- paste0( "^.{", align_index, "}\\]")
+    rep <- comment
+    x <- gsub( re, rep,  x )
+    re <- paste0( "\\\n.{", align_index, "}\\]")
+    rep <- paste0( "\n", comment )
+    x <- gsub( re, rep,  x )
+  }
+
+  default_output_hook( x, options )
+
+})
+
+knitr::opts_template$set("kill_prefix"=list(comment=NA, null_prefix=TRUE))
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+
+```
+
+```{r, "load packages and data and source files"}
+source ("scripts/01_read_data.R")
+forest_plot <- readRDS("data/Final forest plot stratified and interaction.RDS")
+temp_can_delete <- new.env()
+# sa1 <- new.env()
+# sa2 <- new.env()
+load(file = "data/Data.Rdata", envir = temp_can_delete)
+study <- temp_can_delete$study
+rm(temp_can_delete)
+library(ggplot2)
+library(Gmisc)
+library(htmlTable)
+library(gridExtra)
+library(tidyverse)
+library(stringr)
+
+```
+
+# Results section
+```{r "MACE results"}
+load("model_summaries/jags_samples_main.Rdata")
+ratio_upper_lower <- format(round(inter_q[3,] / inter_q[2,],2),nsmall = 2)
+inter_q <- as.data.frame(t(format(round(inter_q,2), nsmall = 2)))
+myrownames <- c("Stratified", "Pooled", "Fixed", "Pooled_tx_strat", "Fixed_tx_strat", "Lau", "Lau plus ours")
+row.names(inter_q) <- myrownames
+inter_q$interaction <- paste0( inter_q[,1], " (95% CI ", inter_q[,2], " to ", inter_q[,3], ")")
+pooled <- inter_q["Pooled" , "interaction"]
+
+men_q <- format(men_q, nsmall = 2)
+ratio_upper_lower <- format(round(women_q[3,] / women_q[2,],2),nsmall = 2)
+women_q <- as.data.frame(t(format(round(women_q,2), nsmall = 2)))
+row.names(women_q) <- c("Three trials", myrownames)
+women_q$women <- paste0( women_q[,1], " (95% CI ", women_q[,2], " to ", women_q[,3], ")")
+women_q$ratio_upper_lower <- ratio_upper_lower
+women_pooled <- women_q[ "Pooled", "women"]
+
+women_q <- format(women_q, nsmall = 2)
+
+rr_prob_r <- readRDS("data/rr_prob_re.RDS")
+rr_prob_r <- round(rr_prob_r, 2)
+```
+
+
+## Meta-analysis
+
+### Sex-treatment interaction
+
+```{r, "information criteria"}
+load(file = "data/mace_dic.Rdata")
+mace_dic <- mace_dic[c("fixed_effects", "random_tx_strat", "random_effects"),]
+mace_smry <- lapply(mace_dic, function (x) paste(
+  paste(x[-3], collapse = ", "),
+  x[3], sep = " and "))
+```
+
+On comparing the three models of sex-treatment interactions across all 8 trials of P2Y~12~ inhibitors, the model assuming a shared sex-treatment interaction for the whole drug-class had both a lower deviance and Deviance Information Criterion (DIC) than the other models (the deviance was `r mace_smry$Deviance` and the DIC was `r mace_smry$DIC` for the identical, stratified and shared models respectively), indicating better fit. Consequently this model was preferred.
+
+For this shared-effects model the rate ratio (RR) for the sex-treatment interaction was `r inter_q["Pooled", "50%"]` (95% Credible Interval (CI) `r inter_q["Pooled", "2.5%"]` to `r inter_q["Pooled", "97.5%"]`, Figure 2), indicating approximately 10% lower efficacy in women. Similar estimates for the sex-treatment interactions were found for the identical-effects (RR `r inter_q["Fixed", "50%"]`; 95% CI `r inter_q["Fixed", "2.5%"]` to `r inter_q["Fixed", "97.5%"]`) and independent-effects (RR for prasugrel/ticagrelor versus clopidogrel comparison `r inter_q["Pooled_tx_strat", "50%"]`; 95% CI `r inter_q["Pooled_tx_strat", "2.5%"]` to `r inter_q["Pooled_tx_strat", "97.5%"]`) models. In the case of the independent model, however, where data was not shared between treatment comparisons and indications, the credible interval was considerably wider.
+
+The treatment effect RR in men for the 3 trials comparing prasugrel or ticagrelor to clopidogrel in acute coronary syndrome was  `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction estimate from the shared model yielded a RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`, `r women_p["re"]`).
+
+
+```{r, "bleeding"}
+load(file = "model_summaries/bleeding.Rdata")
+
+qfx <- function (x) {
+  x <- format( round(x,2), nsmall = 2, trim = TRUE)
+  paste0(x[1], " (95% CI ", x[2], " to ", x[3], ")")
+}
+
+inter_bleed_q_smr <- qfx(inter_bleed_q)
+men_bleed_q_smr <- qfx(men_bleed_q)
+women_bleed_q_smr <- qfx(women_bleed_q)
+
+bleed_events_women <- bleed %>% 
+  select(starts_with("rw")) %>% 
+  as.matrix() %>% 
+  sum()
+
+```
+
+
+For bleeding, the sex-treatment interaction RR was `r inter_bleed_q_smr`. This estimate did not change importantly from the moderately informative prior we used in the modelling for this outcome (prior for sex-treatment interaction on rate ratio scale 1.00; 95% CI 0.80 to 1.25). In men the treatment effect on bleeding was RR `r men_bleed_q_smr`. As such, the modelled treatment effect on bleeding was RR `r women_bleed_q_smr`.
+
+### Sex-specific absolute treatment effects in the Scottish Population
+
+```{r, "baseline risk"}
+br <- read.csv("data/baseline_risk_actual_data.csv", as.is = TRUE)
+br <- br [, names(br) != "surv"]
+names(br) <- c("Age", "Sex", "Population", "Bleeding",  "Cardiovascular", "Non-bleeding, non-cardiovascular")
+br <- br [ , c( "Sex", "Age", "Population", "Bleeding",  "Cardiovascular", "Non-bleeding, non-cardiovascular")]
+br$Age <- gsub("-", " to ", br$Age,fixed = TRUE)
+br_gnd <- br %>%
+  group_by(Sex) %>%
+  summarise (Age = "Total", Population = sum(Population), Bleeding = sum(Bleeding), Cardiovascular = sum(Cardiovascular),
+             `Non-bleeding, non-cardiovascular` = sum (`Non-bleeding, non-cardiovascular`))
+br_tot <- br %>%
+  summarise (Age = "", Sex = "Both", Population = sum(Population), Bleeding = sum(Bleeding), Cardiovascular = sum(Cardiovascular), `Non-bleeding, non-cardiovascular` = sum (`Non-bleeding, non-cardiovascular`))
+br <- rbind(br, br_gnd)
+br <- br[ order(br$Sex, br$Age),]
+br <- rbind(br, br_tot)
+br$Sex [duplicated(br$Sex)] <- ""
+br$Age[br$Age == "ZZZ"] <- ""
+
+br$`All cause` <- br$Bleeding + br$Cardiovascular + br$`Non-bleeding, non-cardiovascular`
+
+br [ , c("Bleeding",  "Cardiovascular", "Non-bleeding, non-cardiovascular", "All cause")] <- 
+  lapply (br[, c("Bleeding",  "Cardiovascular", "Non-bleeding, non-cardiovascular", "All cause")], function (x){
+    x_p <- round(100* x/ br$Population, 1)
+    x_p <- format(x_p, digits = 2, trim = TRUE)
+    paste0(x, " (", x_p, "%)")
+  })
+```
+
+There were `r br[br$Sex == "Both", "Population"]` patients admitted to hospital in Scotland with
+myocardial infarction over the 5-year period, among whom there were
+`r br[br$Sex == "Both", "All cause"]` deaths. The majority of deaths were from cardiovascular
+causes `r br[br$Sex == "Both", "Cardiovascular"]`, and bleeding was recorded as the cause
+of death in `r br[br$Sex == "Both", "Bleeding"]` cases. Overall cardiovascular deaths
+were commoner in women, but bleeding deaths were similar in both sexes
+(Table 2). The sex differences in cardiovascular mortality differed by
+age with younger women having higher mortality than men, and older women
+having lower mortality than men.
+
+
+```{r, "absolute risk reduction"}
+load(file = "data/Results_scotland_effects.Rdata")
+arr_prob <- readRDS(file = "data/prob_arr_men_grt_arr_women.Rds")
+arr_prob <- round(arr_prob,2)
+
+# re fornmat so include % for main analysis
+arr_smry_0avd_non_cllps <- apply(arr_smry_0avd_non_cllps, 1:2, function (x) {
+  str_replace_all(x, fixed(" (95% CI"), "% (95% CI")
+})
+# replace ( with ;) fornmat and include % for sensitivity analysis
+arr_smry_0null_mace <- apply(arr_smry_0null_mace, 1:2, function (x) {
+  x <- str_replace_all(x, fixed(" (95% CI"), "%; 95% CI")
+  str_replace_all(x, fixed(")"), "")
+})
+# replace - with " to " and 
+gender_age_spec_0 [ , c("Bleeding", "Cardiovascular", "Other")] <- 
+  lapply(gender_age_spec_0[ , c("Bleeding", "Cardiovascular", "Other")], function (x) {
+    x <- str_replace(x, "([0-9])(-)([0-9])", "\\1 to \\3")
+    str_replace(x, fixed(" ("), "% (95% CI")
+  })
+```
+
+Based on our model the absolute risk reduction in all-cause mortality at one-year was similar in both sexes. For the 27,818 men admitted to hospital with
+myocardial infarction the modelled absolute risk reduction (ARR) was `r arr_smry_0avd_non_cllps["Men", "Cardiovascular"]`
+for cardiovascular, `r arr_smry_0avd_non_cllps["Men", "Bleeding"]` for bleeding 
+and `r arr_smry_0avd_non_cllps["Men", "Overall"]` for
+all-cause mortality. For the 17,842 women the ARRs were similar,  `r arr_smry_0avd_non_cllps["Women", "Cardiovascular"]` for
+cardiovascular, `r arr_smry_0avd_non_cllps["Women", "Bleeding"]` for bleeding and
+`r arr_smry_0avd_non_cllps["Women", "Overall"]` for all-cause
+mortality. In contrast with the `r inter_p["re"]` probability that relative treatment efficacy is lower in women than men, the probability that the absolute risk reduction for all-cause mortality was lower in women than men was only `r arr_prob`.
+
+In a subsequent analysis, we examined the absolute treatment effect
+assuming that the relative treatment effect was the same in both sexes. Under this alternative model a larger benefit was seen in women (`r arr_smry_0null_mace["Women", "Overall"]`) than in men (`r arr_smry_0null_mace["Men", "Overall"]`).
+
+### Age and sex-specific absolute treatment effects
+
+The same pattern was evident when the absolute treatment effects were
+modelled within each age-group (Figure 3). Assuming no age-treatment
+interaction, much larger absolute risk reductions were seen in older
+people than in younger people. For example the absolute risk reduction was `r gender_age_spec_0[gender_age_spec_0$Age == "30-39" & gender_age_spec_0$Sex == "Men", "Cardiovascular"]` and `r gender_age_spec_0[gender_age_spec_0$Age == "70-79" & gender_age_spec_0$Sex == "Men", "Cardiovascular"]` in men aged 30-39 and 70-79 respectively.
+
+### Sensitivity analyses
+
+We modelled the absolute treatment effect for a range of different event
+rates for cardiovascular and bleeding deaths in women and men. We
+allowed for bleeding rates up to 10-fold higher in men than observed,
+and up to 2-fold higher in women than in men. In all of these analyses,
+the point estimate for the absolute treatment effect in women remained
+consistently above the null (supplementary appendix).
+
+
+
+# Abstract
+
+Objective
+---------
+
+To estimate the absolute treatment effects of newer P2Y~12~ inhibitors
+(ticagrelor and prasugrel) compared to clopidogrel in men and women with
+acute coronary syndrome.
+
+Design
+------
+
+Systematic review and meta-analysis of randomised clinical trials, and
+modelling study with routine healthcare data.
+
+Data Sources
+------------
+
+Ovid MEDLINE and EMBASE and the Cochrane Central Register of Controlled
+Trials (CENTRAL). National register of all hospitalisations in Scotland
+from 2006 to 2010 (prior to introduction of prasugrel or ticagrelor).
+
+Eligibility criteria
+--------------------
+
+Randomised controlled trials of oral P2Y~12~ inhibitors for stroke or
+acute coronary syndrome where sex-specific estimates were provided.
+Trials of intravenous P2Y~12~ inhibitors or that that randomised patients to different durations
+of P2Y~12~ therapy were excluded.
+
+Modelled outcomes
+-----------------
+
+Cardiovascular, bleeding and all-cause mortality.
+
+Results
+-------
+
+From 7,148 articles, 36 were reviewed in detail with 8 fulfilling our
+inclusion criteria. Trials compared clopdigorel to placebo in acute coronary syndrome (3 trials) and stroke (2 trials) or newer P2Y~12~ inhibitors to clopidogrel in acute coronary syndrome (3 trials). This provided a total of 109,570 randomised participants. For all 8 trials, for major adverse cardiovascular events the sex-treatment interaction rate ratio (RR) was `r inter_q["Pooled", "interaction"]`, such that the probability that relative treatment efficacy for P2Y~12~ inhibitors is lower in women than in men is `r rr_prob_r`.
+
+For the 3 trials of prasugrel or ticagrelor compared to clopidogrel for acute coronary syndrome, the treatment RR  in men was `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction for the drug-class yielded a treatment RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
+
+On applying these (and major bleeding) treatment effect estimates to mortality data for Scotland; For the 27,818 men admitted to hospital with myocardial infarction the modelled absolute risk reduction (ARR) at one year was `r arr_smry_0avd_non_cllps["Men", "Cardiovascular"]` for cardiovascular, `r arr_smry_0avd_non_cllps["Men", "Bleeding"]` for bleeding and `r arr_smry_0avd_non_cllps["Men", "Overall"]` for all-cause mortality. For the 17,842 women the ARRs were similar, `r arr_smry_0avd_non_cllps["Women", "Cardiovascular"]` for cardiovascular, `r arr_smry_0avd_non_cllps["Women", "Bleeding"]` for bleeding and `r arr_smry_0avd_non_cllps["Women", "Overall"]` for all-cause mortality, such that the probability that the absolute risk reduction for all-cause mortality was lower in women than men was only `r arr_prob`.
+
+Conclusion
+----------
+
+In a meta-analysis and modelling study using data from 100,000 participants randomised to P2Y~12~ inhibitors and over 45,000 patients from the Scottish population hospitalized with myocardial infarction we have identified that newer P2Y~12~ inhibitors may be slightly less efficacious in women than men (around 1.1-fold lower), but that the absolute risk reduction is similar in both sexes
+
+# Tables and Figures
+
+### Figure 2 Events and rates for MACE with figure
+```{r, fig.height=7, fig.width=14}
+forest_plot <- readRDS(file = "data/Final forest plot stratified and interaction.RDS")
+forest_plot
+```
+
+
+## Figure 3 Age and sex specific baseline risks and absolute risk reduction
+
+```{r, fig.height= 4, fig.width=10}
+load(file = "data/Bline, ARR plots.Rdata")
+tiff(filename = "figures/figure3_bline_arr.tiff", units = "in",
+       height = 6, width = 14, compression = "lzw", res = 300)
+gridExtra::grid.arrange(bline + guides(colour = FALSE) ,
+                        arr_single +
+                          theme(axis.text.y = element_blank(), axis.title.y = element_blank()),
+                        layout_matrix = matrix(c(1,2), nrow = 1))
+dev.off()
+```

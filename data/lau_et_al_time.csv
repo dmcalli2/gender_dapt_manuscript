@@ -1,0 +1,7 @@
+trial,time,indication,comparison
+TRITON-TIMI 38,14.5,ACS,prasugrel_clopidogrel
+PLATO,12,ACS,ticagrelor_clopidogrel
+CHAMPION PCI+PLATFORM,0.066666667,PCI,cangrelor_clopidogrel
+TRILOGY ACS,17.1,ACS,prasugrel_clopidogrel
+CHAMPION PHOENIX,0.066666667,PCI,cangrelor_clopidogrel
+PEGASUS-TIMI 54,33,stable,ticagrelor_clopidogrel
