@@ -211,12 +211,16 @@ people than in younger people. For example the absolute risk reduction was `r ge
 
 ### Sensitivity analyses
 
+```{r}
+pt_est_rng <- readRDS("synth_sa_smry/pt_est_rng.Rds")
+```
+
 We modelled the absolute treatment effect for a range of different event
-rates for cardiovascular and bleeding deaths in women and men. We
+rates for bleeding deaths in women and men. We
 allowed for bleeding rates up to 10-fold higher in men than observed,
 and up to 2-fold higher in women than in men. In all of these analyses,
-the point estimate for the absolute treatment effect in women remained
-consistently above the null (supplementary appendix).
+the point estimate for the overall absolute treatment effect in women remained
+consistently around 2% (range `r pt_est_rng`).
 
 
 
@@ -259,7 +263,7 @@ Results
 -------
 
 From 7,148 articles, 36 were reviewed in detail with 8 fulfilling our
-inclusion criteria. Trials compared clopdigorel to placebo in acute coronary syndrome (3 trials) and stroke (2 trials) or newer P2Y~12~ inhibitors to clopidogrel in acute coronary syndrome (3 trials). This provided a total of 109,570 randomised participants. For all 8 trials, for major adverse cardiovascular events the sex-treatment interaction rate ratio (RR) was `r inter_q["Pooled", "interaction"]`, such that the probability that relative treatment efficacy for P2Y~12~ inhibitors is lower in women than in men is `r rr_prob_r`.
+inclusion criteria. Trials compared clopdigorel to placebo in acute coronary syndrome (3 trials) and stroke (2 trials) or newer P2Y~12~ inhibitors to clopidogrel in acute coronary syndrome (3 trials). This provided a total of 109,570 randomised participants. Across all 8 trials, for major adverse cardiovascular events the sex-treatment interaction rate ratio (RR) was `r inter_q["Pooled", "interaction"]`, such that the probability that relative treatment efficacy for P2Y~12~ inhibitors is lower in women than in men is `r rr_prob_r`.
 
 For the 3 trials of prasugrel or ticagrelor compared to clopidogrel for acute coronary syndrome, the treatment RR  in men was `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction for the drug-class yielded a treatment RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
 
