@@ -13,7 +13,8 @@ source("scripts/05_extract_stratified.R")
 source("scripts/06_Summarise_results_using_non_linear_models.R")
 
 ## Run baseline risk model and model treatment effects in Scottish population
-source("scripts/07_baseline_risks_and_ES.R")
+source("scripts/07a_baseline_risks_and_ES.R")
+source("scripts/07b_baseline_risks_and_ES_sens_analysis.R")
 
 ## Create summary tables and plots
 source("scripts/08a_process_plots_tables.R")

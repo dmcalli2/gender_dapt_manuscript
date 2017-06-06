@@ -2,9 +2,13 @@
 title: "Supplementary appendix"
 output:
   html_document:
-    toc: true
-    toc_float: false
-    number_sections: true
+    number_sections: yes
+    toc: yes
+    toc_float: no
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 ```{r, setup, include=FALSE}
@@ -123,6 +127,7 @@ knitr::kable(inter_q)
 # Assumptions
 
 The following assumptions were required for this analysis:-
+
 - Sex-treatment interactions are exchangeable between trials within the same drug-class
 - Sex-specific relative treatment effects are transportable from the clinical trial populations to the target Scottish population
 - For the age-specific analysis that non-collapsability does not importantly affect the age-specific rate ratios
