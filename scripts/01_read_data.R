@@ -23,7 +23,7 @@ names(bleed) <- gsub(".", "_", names(bleed), fixed = TRUE)
 # identify follow-up period ----
 main$duration_of_follow_up
 main$time <- c("12 months" = 12, "Hospital discharge or 28 days." = 1, "30 days" = 1, "15 months" = 15,  
-                "12 months" = 12, "30 months" = 30, "90 days" = 3, "3.4 years" = 3.4*12)/12
+                "12 months" = 12, "30 months" = 30, "90 days" = 3, "3.4 years" = 3.4*12, "90 days" = 3)/12
 
 # Treat prasugrel and ticagrelor as single treatment  ----
 # Collapse ticagrelor and prasugrel into a single comparison
@@ -33,6 +33,9 @@ main <- filter(main, indication %in% c("ACS", "Stroke")) %>%
 # select study characteristics needed for analyses ----
 study <- main [ , c('trial','indication', 'drug_control', 'drug_intervention', 'time')]
 study$comparison <- paste0(study$drug_intervention, "_", study$drug_control)
+
+# Collapse all stroke studies into a single comparison as there is only one ticagrelor versus aspirin study
+study$comparison[study$indication == "Stroke"] <- "clopidogrel_placebo"
 
 ## Create a study ID 
 study <- study[, c("trial","indication", "comparison", "time")]

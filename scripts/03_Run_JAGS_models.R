@@ -19,7 +19,11 @@ load.module("dic")
 if(!dir.exists("jags_samples_main")) dir.create ("jags_samples_main")
 
 # List files and make vector
-filenames <- list.files("jags_code")
+filenames <- c("bleed_re.txt", "bleed_strat.txt", "fixed_effects.txt", "fixed_tx_strat.txt", 
+               "lau.txt", "lau_sa.txt", "prasugrel_only_men.txt", "prasugrel_only_men_bleed.txt", 
+               "prasugrel_only_women_men.txt", "random_effects.txt", "random_tx_strat.txt", 
+               "stratified.txt")
+
 names(filenames) <- filenames
 
 ## Sampling, burnin etc for models----
@@ -43,6 +47,7 @@ source ("scripts/01_read_data.R")
 # Choose which models to run ----
 # Selects desired model assigns filename; can loop if want
 for (filename in filenames){
+  print(filename)
   # for (filename in "random_effects.txt"){
   outname <- gsub(".txt", ".Rdata", filename)
   dicname <- gsub(".txt", "_dic.Rdata", filename)

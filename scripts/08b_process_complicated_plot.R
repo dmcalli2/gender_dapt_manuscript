@@ -6,6 +6,7 @@ library(grid)
 library(gridExtra)
 library(tidyverse)
 library(stringr)
+library(ggthemes)
 
 ## Data and summaries
 load (file = "model_summaries/stratified_each_trial.Rdata")
@@ -21,100 +22,102 @@ pooled <- inter_q["Pooled" , ]
 names(pooled) <- paste0("q", c(50, 2.5, 97.5))
 pooled[] <- lapply(pooled, as.double)
 
-# Summarise treatment effect at trial level in men and women
-forest_data <- bind_rows (trials, c(param = "inter", variable = "pooled", pooled))
-forest_data <- forest_data %>%
-  add_row(param = "men", variable = "pooled") %>%
-  add_row(param = "women", variable = "pooled")
 
-# Create table for beside plot
-evnt_smry <- merge(main_wide [ , c(1, 6:13)],
-                   bleed[, c(1, 6:9)],
-                   by = "trial",
-                   all.x = TRUE)
+## Plot Figure 2A, gender-specific effects
+# Create combined file in inkscape
+table_order <- main_wide
 
-# Set order for figure
-trial_ordr <- structure(list(trial_order = c("ASPS3", "BCHANCE", "CTRITON-TIMI 38", 
-                                             "DTRILOGY ACS", "EPLATO", "FCURE", "GCOMMIT", "HCLARITY-TIMI 28"),
-                             trial_label = c("SPS3", "CHANCE", "TRITON-TIMI 38", "TRILOGY ACS", "PLATO", "CURE", 
-                                             "COMMIT", "CLARITY-TIMI 28")),
-                        class = c("tbl_df", "tbl", "data.frame"),
-                        row.names = c(NA, -8L), 
-                        .Names = c("trial_order", "trial_label"))
+table_order$comparison[table_order$indication == "Stroke"] <- "Stroke"
+table_order$comparison[table_order$indication == "ACS" & table_order$comparison == "clopidogrel_placebo"] <- 
+  "ACS, clopidogrel"
+table_order$comparison[table_order$indication == "ACS" & table_order$comparison == "prasugrel_clopidogrel"] <- 
+  "ACS, novel P2Y12"
 
-row.names(evnt_smry) <- evnt_smry$trial
-evnt_smry$trial <- NULL
-evnt_smry <- evnt_smry[rev(trial_ordr$trial_label),]
-# Add in totals row
-mace <- as.matrix(evnt_smry[,5:8])
-n <- as.matrix(evnt_smry[,1:4])
-mace_per <- SmryPrcnt(mace, n)
-mace_per <- as.data.frame(mace_per)
-names(mace_per) <- c("women_i", "women_c", "men_i", "men_c")
-mace_per$women <- paste(mace_per$women_i, mace_per$women_c, sep = "/")
-mace_per$men <- paste(mace_per$men_i, mace_per$men_c, sep = "/")
-mace_per <- mace_per[, c("men", "women")]
-row.names(mace_per) <- row.names(evnt_smry)
-# Save table so can read in final paper
-saveRDS(mace_per, file = "data/Table results for forest plot.Rds")
+table_order <- table_order %>% 
+  mutate(comparison_f = factor(comparison, levels = c("ACS, novel P2Y12", "ACS, clopidogrel",
+                                                                  "Stroke"),
+                               labels = c("1 ACS, novel P2Y12", "2 ACS, clopidogrel",
+                                                                  "3 Stroke"),
+                                ordered = TRUE)) %>% 
+  arrange(comparison_f, trial) %>% 
+  mutate(my_order = 1:nrow(.))
+table_order$my_order [table_order$my_order %in% 7:9] <- table_order$my_order [table_order$my_order %in% 7:9]+ 2
+table_order$my_order [table_order$my_order %in% 4:6] <- table_order$my_order [table_order$my_order %in% 4:6]+ 1
 
-## Use to draw plot
-forest_table <- mace_per
 
-############
-# Set ID for ordering
-forest_data$trial_id <- group_indices(forest_data, variable)
-forest_data$trial_id[forest_data$variable == "pooled"] <- max(forest_data$trial_id) + 1
-trial_labels <- forest_data %>% 
-  select(trial_id, variable) %>%
-  distinct() %>%
-  arrange(-trial_id)
-
-# Set into left and right panel
-forest_data$panel <- ifelse(forest_data$param != "inter", "Gender-specific", "Interaction")
-
-## Relabel for printing
-forest_data$trial_id <- factor(forest_data$trial_id,
-                               levels = trial_labels$trial_id,
-                               labels = trial_labels$variable)
-
-forest_data$param <- factor(forest_data$param,
-                            levels = c("men", "women", "inter"),
-                            labels = c("Men", "Women", "Interaction"))
-
-forest_data$pooled <- ifelse(forest_data$variable == "pooled", "pooled", "not")
-
-forest_table <- forest_table[rev(levels(forest_data$trial_id)),]
-forest_table$trial_id <- rev(levels(forest_data$trial_id))
-forest_table$trial_id <- factor(forest_table$trial_id, levels = levels(forest_data$trial_id))
-forest_table <- as_tibble(forest_table) %>%
-  select(trial_id, men, women)
-forest_table$men <- paste("Men", forest_table$men)
-forest_table$women <- paste("Women", forest_table$women)
-forest_table$all_text <- paste(forest_table$trial_id, forest_table$men, forest_table$women, sep = "\n")
-forest_table[nrow(forest_table), -1] <- rep(NA, 3)
-forest_data <- inner_join(forest_data, select(forest_table, trial_id, all_text), by = "trial_id")
-forest_data$all_text[nrow(forest_data) - 3] <- paste(c("", "Interaction rate ratio",
-                                                       "(shared model)"), collapse = "\n")
-# Draw plots
-forest_plot <- ggplot(forest_data, aes(x = as.numeric(trial_id), colour = param, shape = pooled,
-                                       y = q50, ymin = q2.5, ymax = q97.5)) +
-  geom_point(position = position_dodge(width = 0.5)) + 
-  geom_errorbar(position = position_dodge(width = 0.5)) +
-  facet_grid(~ panel) +
+men_women <- trials %>% 
+  mutate(trial = as.character(variable),
+         Sex = factor(param, levels = c("men", "women"), labels = c("Men", "Women"))) %>% 
+  filter(param %in% c("men", "women")) %>% 
+  inner_join(table_order) %>% 
+  ggplot(aes(x = my_order, y = q50, ymin = q2.5, ymax = q97.5,
+             colour = Sex, shape = Sex,  group = interaction(param, comparison))) +
+  geom_point(position = position_dodge(width = 0.75)) + 
+  geom_errorbar(position = position_dodge(width = 0.75)) +
+  scale_x_continuous(name = NULL, breaks = NULL) +
+  scale_y_continuous(name = "Rate ratio") +
   coord_flip() +
-  scale_y_continuous("Rate ratio (95% CI)") +
-  scale_x_continuous(NULL, breaks = 9:1, labels = unique(na.omit(forest_data$all_text))) +
-  scale_color_discrete(NULL, guide = FALSE) +
-  scale_shape(NULL, guide = FALSE) +
   geom_hline(mapping = aes(yintercept = 1), linetype = "dashed") +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0),
-        axis.text.y = element_text(angle = 0, hjust = 0))
-forest_plot
+  scale_shape(name = NULL) +
+    scale_color_colorblind(name = NULL) +
+  theme_classic()
+win.metafile  (filename = "figures/figure2_colourblindsafe.emf")
+men_women
+dev.off()
 
-ggsave("figures/forest_plot_with_table.tiff", plot = forest_plot, units = "in",
-       height = 6, width = 12, compression = "lzw")
+## Table to go with plot
+trials_wide <- trials %>% 
+  mutate(trial = as.character(variable)) %>% 
+  mutate(RR = paste0(q50, " (", q2.5, " to ", q97.5, ")")) %>% 
+  dplyr::select(trial, param, RR) %>% 
+  spread(key = param, value = RR, sep = "_")
+men_women <- trials_wide %>% 
+  dplyr::select(trial, param_men, param_women)
 
-saveRDS(forest_plot, file = "data/Final forest plot stratified and interaction.RDS")
 
+men_women_table <- table_order %>% 
+  inner_join(men_women) %>% 
+  dplyr::select(my_order, trial, comparison,
+                rwt, nwt,
+                rwc, nwc,
+                param_women,
+                rmt, nmt,
+                rmc, nmc,
+                param_men) 
 
+write_csv(men_women_table, path = "figures/table_figure2a.csv")
+tapply(table_order$my_order, table_order$comparison, range)
+
+## Summarise interaction effect
+inters_table <- trials_wide %>% 
+  inner_join(table_order) %>% 
+    arrange(-my_order) %>% 
+  dplyr::select(my_order, trial, comparison, RR = param_inter)
+write_csv(inters_table, path = "figures/table_figure2b.csv")
+
+inters <- trials %>% 
+  filter(param == "inter") %>% 
+  bind_rows(pooled) %>% 
+  mutate(shape_type = if_else(is.na(param), "pooled", "trial"),
+         trial = as.character(variable),
+         my_size = 1/(log(q97.5/q50)/1.96)^2,
+         my_size = if_else(shape_type == "pooled", my_size *2, my_size)) # in R diamond shape sits inside square shape
+
+inters_plot <- inters %>% 
+  left_join(table_order) %>% 
+  mutate(my_order = if_else(is.na(my_order), 1, my_order + 2)) %>% 
+  ggplot(aes(x = my_order, y = q50, ymin = q2.5, ymax = q97.5, shape = shape_type)) +
+  geom_point(mapping = aes(size = my_size)) + 
+  geom_errorbar() +
+  # scale_x_continuous(name = NULL, breaks = NULL) +
+  scale_y_continuous(name = "Rate ratio") +
+  coord_flip() +
+  geom_hline(mapping = aes(yintercept = 1), linetype = "dashed") +
+  scale_shape_manual(name = NULL, guide = FALSE, values = c(18, 15)) +
+  scale_size(name = NULL, guide = FALSE) +
+  theme_classic()
+inters_plot
+
+win.metafile  (filename = "figures/figure2b_colourblindsafe.emf")
+inters_plot
+dev.off()

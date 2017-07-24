@@ -277,9 +277,12 @@ In a meta-analysis and modelling study using data from 100,000 participants rand
 # Tables and Figures
 
 ### Figure 2 Events and rates for MACE with figure
-```{r, fig.height=7, fig.width=14}
+```{r, fig.height=4, fig.width=7}
 forest_plot <- readRDS(file = "data/Final forest plot stratified and interaction.RDS")
 forest_plot
+tiff("figures/figure2.tiff", width = 14, height = 7, units = "in", res = 600, compression = "lzw")
+forest_plot
+dev.off()
 ```
 
 
