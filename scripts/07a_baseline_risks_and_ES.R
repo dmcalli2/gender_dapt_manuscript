@@ -34,7 +34,7 @@ br_test <- br_test %>%
          other = death - bleed - cv,
          surv = n - death,
          age = paste0(age, "-", age +9)) %>%
-  select(-death)
+  dplyr::select(-death)
 
 
 ## Choose iterations and burnin ----
