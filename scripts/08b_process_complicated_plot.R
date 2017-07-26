@@ -51,8 +51,7 @@ men_women <- trials %>%
   inner_join(table_order) %>% 
   ggplot(aes(x = 1000-my_order, y = q50, ymin = q2.5, ymax = q97.5,
              colour = Sex, shape = Sex,  group = interaction(param, comparison))) +
-  geom_point(position = position_dodge(width = 0.75), shape = 15) + 
-  geom_pointrange(position = position_dodge(width = 0.75)) +
+  geom_pointrange(position = position_dodge(width = 0.75), shape = 15) +
   scale_x_continuous(name = NULL, breaks = NULL) +
   scale_y_continuous(name = "Rate ratio") +
   coord_flip() +
@@ -108,14 +107,14 @@ diamond2 <- data.frame(y = c(diamond$q2.5, diamond$q50, diamond$q97.5, diamond$q
            x = c(0, 0.5, 0, -0.5, 0) + diamond$my_order)
 
 inters_plot <-   ggplot(inters) +
-  geom_point(mapping = aes(x = 1000-my_order, y = q50, shape = shape_type, size = my_size)) + 
-  geom_pointrange(mapping = aes(x = 1000-my_order, y = q50, ymin = q2.5, ymax = q97.5)) +
+  geom_linerange(mapping = aes(x = 1000-my_order, ymin = q2.5, ymax = q97.5)) +
+  geom_point(data = filter(inters, shape_type == "trial"),
+             mapping = aes(x = 1000-my_order, y = q50, size= my_size), shape = 15) +
   geom_polygon(data = diamond2, mapping = aes(x = 1000-x, y = y)) +
   scale_x_continuous(name = NULL, breaks = NULL) +
   scale_y_continuous(name = "Rate ratio") +
   coord_flip() +
   geom_hline(mapping = aes(yintercept = 1), linetype = "dashed") +
-  scale_shape_manual(name = NULL, guide = FALSE, values = c(18, 15)) +
   scale_size(name = NULL, guide = FALSE) +
   theme_classic(base_size = 20)
 inters_plot
