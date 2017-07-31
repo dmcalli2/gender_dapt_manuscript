@@ -27,11 +27,7 @@ for (z in 1:n_trials){
    wd[z] ~ dnorm(wd_delta, wd_tau)
 } #end of trials
    # Meta-analysis level priors
-   # Meta-analysis level priors
-   # d_delta ~ dnorm(0, 0.0001)
-   # d_tau <-  1/d_var
-   # d_var ~ dlnorm(-3.23, 1/1.88^2)
-    
+ 
    wd_delta ~ dnorm(0, 0.0001)
    wd_tau <-  1/wd_var
    wd_var ~ dlnorm(-3.23, 1/1.88^2)
@@ -251,8 +247,7 @@ model{
     }#trials
     wd_delta[ci] ~ dnorm(0, 0.0001)
   }#comparison and indication
-  # ancestor priors
-  var1 ~  dlnorm(-3.23, 1/1.88^2) # only variance is between trial within treatment/comparison
+  var1 ~  dlnorm(-3.23, 1/1.88^2) 
   prec1 <- 1 / var1
   sd1 <- var1^0.5
 } # model

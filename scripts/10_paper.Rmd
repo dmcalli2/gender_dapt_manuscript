@@ -98,11 +98,11 @@ mace_smry <- lapply(mace_dic, function (x) paste(
   x[3], sep = " and "))
 ```
 
-On comparing the three models of sex-treatment interactions across all 9 trials of P2Y~12~ inhibitors, the model assuming a shared sex-treatment interaction for the whole drug-class had both a lower deviance and Deviance Information Criterion (DIC) than the other models (the deviance was `r mace_smry$Deviance` and the DIC was `r mace_smry$DIC` for the identical, stratified and shared models respectively), indicating better fit. Consequently this model was preferred.
+On comparing the three models of sex-treatment interactions across all 9 trials of P2Y~12~ inhibitors (Figure 2), the model assuming a shared sex-treatment interaction for the whole drug-class had both a lower deviance and DIC than the other models (the deviance was `r mace_smry$Deviance` and the DIC was `r mace_smry$DIC` for the identical, stratified and shared models respectively), indicating better fit. Consequently this model was preferred.
 
-For this shared-effects model the rate ratio (RR) for the sex-treatment interaction was `r inter_q["Pooled", "50%"]` (95% Credible Interval (CI) `r inter_q["Pooled", "2.5%"]` to `r inter_q["Pooled", "97.5%"]`, Figure 2), indicating approximately 10% lower efficacy in women. Similar estimates for the sex-treatment interactions were found for the identical-effects (RR `r inter_q["Fixed", "50%"]`; 95% CI `r inter_q["Fixed", "2.5%"]` to `r inter_q["Fixed", "97.5%"]`) and independent-effects (RR for prasugrel/ticagrelor versus clopidogrel comparison `r inter_q["Pooled_tx_strat", "50%"]`; 95% CI `r inter_q["Pooled_tx_strat", "2.5%"]` to `r inter_q["Pooled_tx_strat", "97.5%"]`) models. In the case of the independent model, however, where data was not shared between treatment comparisons and indications, the credible interval was considerably wider.
+For this shared-effects model the rate ratio (RR) for the sex-treatment interaction was `r inter_q["Pooled", "50%"]` (95% Credible Interval (CI) `r inter_q["Pooled", "2.5%"]` to `r inter_q["Pooled", "97.5%"]`, Figure 3), indicating approximately 10% lower efficacy in women. Similar estimates for the sex-treatment interactions were found for the identical-effects (RR `r inter_q["Fixed", "50%"]`; 95% CI `r inter_q["Fixed", "2.5%"]` to `r inter_q["Fixed", "97.5%"]`) and independent-effects (RR for prasugrel/ticagrelor versus clopidogrel comparison `r inter_q["Pooled_tx_strat", "50%"]`; 95% CI `r inter_q["Pooled_tx_strat", "2.5%"]` to `r inter_q["Pooled_tx_strat", "97.5%"]`) models.
 
-The treatment effect RR in men for the 3 trials comparing prasugrel or ticagrelor to clopidogrel in acute coronary syndrome was  `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction estimate from the shared model yielded a RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`, `r women_p["re"]`).
+The treatment effect RR in men for the 3 trials comparing prasugrel or ticagrelor to clopidogrel in ACS was  `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction estimate from the shared model yielded a RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`, `r women_p["re"]`).
 
 
 ```{r, "bleeding"}
@@ -125,7 +125,7 @@ bleed_events_women <- bleed %>%
 ```
 
 
-For bleeding, the sex-treatment interaction RR was `r inter_bleed_q_smr`. This estimate did not change importantly from the moderately informative prior we used in the modelling for this outcome (prior for sex-treatment interaction on rate ratio scale 1.00; 95% CI 0.80 to 1.25). In men the treatment effect on bleeding was RR `r men_bleed_q_smr`. As such, the modelled treatment effect on bleeding was RR `r women_bleed_q_smr`.
+For bleeding, the sex-treatment interaction RR was `r inter_bleed_q_smr`. This estimate did not change importantly from the moderately informative prior we used in the modelling for this outcome (prior for sex-treatment interaction on rate ratio scale 1.00; 95% CI 0.80 to 1.25). In men the treatment effect on bleeding was RR `r men_bleed_q_smr`. As such, the modelled treatment effect on bleeding in women was RR `r women_bleed_q_smr`.
 
 ### Sex-specific absolute treatment effects in the Scottish Population
 
@@ -144,8 +144,6 @@ br_tot <- br %>%
 br <- rbind(br, br_gnd)
 br <- br[ order(br$Sex, br$Age),]
 br <- rbind(br, br_tot)
-br$Sex [duplicated(br$Sex)] <- ""
-br$Age[br$Age == "ZZZ"] <- ""
 
 br$`All cause` <- br$Bleeding + br$Cardiovascular + br$`Non-bleeding, non-cardiovascular`
 
@@ -155,18 +153,18 @@ br [ , c("Bleeding",  "Cardiovascular", "Non-bleeding, non-cardiovascular", "All
     x_p <- format(x_p, digits = 2, trim = TRUE)
     paste0(x, " (", x_p, "%)")
   })
+
+## Retain labels to allow index referencing for abstract and results
+br_reference <- br %>% 
+  filter(Age == "Total")
+
+## Remove duplicate labels for tables
+br$Sex [duplicated(br$Sex)] <- ""
+br$Age[br$Age == "ZZZ"] <- ""
+
 ```
 
-There were `r br[br$Sex == "Both", "Population"]` patients admitted to hospital in Scotland with
-myocardial infarction over the 5-year period, among whom there were
-`r br[br$Sex == "Both", "All cause"]` deaths. The majority of deaths were from cardiovascular
-causes `r br[br$Sex == "Both", "Cardiovascular"]`, and bleeding was recorded as the cause
-of death in `r br[br$Sex == "Both", "Bleeding"]` cases. Overall cardiovascular deaths
-were commoner in women, but bleeding deaths were similar in both sexes
-(Table 2). The sex differences in cardiovascular mortality differed by
-age with younger women having higher mortality than men, and older women
-having lower mortality than men.
-
+17,842 women and 27,818 men were admitted to hospital with myocardial infarction. Mortality was higher for women than men for all-cause mortality (`r br_reference[br_reference$Sex == "Female", "All cause"]` versus `r br_reference[br_reference$Sex == "Male", "All cause"]`) and cardiovascular mortality (`r br_reference[br_reference$Sex == "Female", "Cardiovascular"]` versus `r br_reference[br_reference$Sex == "Male", "Cardiovascular"]`). Mortality related to bleeding was also commoner in women(`r br_reference[br_reference$Sex == "Female", "Bleeding"]` versus `r br_reference[br_reference$Sex == "Male", "Bleeding"]`) deaths. The sex differences in cardiovascular mortality differed by age with younger women having higher mortality than men, and older women having lower mortality than men (Table 2, Figure 4).
 
 ```{r, "absolute risk reduction"}
 load(file = "data/Results_scotland_effects.Rdata")
@@ -194,13 +192,13 @@ Based on our model the absolute risk reduction in all-cause mortality at one-yea
 myocardial infarction the modelled absolute risk reduction (ARR) was `r arr_smry_0avd_non_cllps["Men", "Cardiovascular"]` for cardiovascular, `r arr_smry_0avd_non_cllps["Men", "Bleeding"]` for bleeding 
 and `r arr_smry_0avd_non_cllps["Men", "Overall"]` for all-cause mortality. For the 17,842 women the ARRs were similar,  `r arr_smry_0avd_non_cllps["Women", "Cardiovascular"]` for cardiovascular, `r arr_smry_0avd_non_cllps["Women", "Bleeding"]` for bleeding and `r arr_smry_0avd_non_cllps["Women", "Overall"]` for all-cause mortality. In contrast with the `r inter_p["re"]` probability that relative treatment efficacy is lower in women than men, the probability that the absolute risk reduction for all-cause mortality was lower in women than men was only `r arr_prob`.
 
-In a subsequent analysis, we examined the absolute treatment effect
+In a subsequent analysis, we modelled the absolute treatment effect
 assuming that the relative treatment effect was the same in both sexes. Under this alternative model a larger benefit was seen in women (`r arr_smry_0null_mace["Women", "Overall"]`) than in men (`r arr_smry_0null_mace["Men", "Overall"]`).
 
 ### Age and sex-specific absolute treatment effects
 
 The same pattern was evident when the absolute treatment effects were
-modelled within each age-group (Figure 3). Assuming no age-treatment
+modelled within each age-group (Figure 4). Assuming no age-treatment
 interaction, much larger absolute risk reductions were seen in older
 people than in younger people. For example the absolute risk reduction was `r gender_age_spec_0[gender_age_spec_0$Age == "30-39" & gender_age_spec_0$Sex == "Men", "Cardiovascular"]` and `r gender_age_spec_0[gender_age_spec_0$Age == "70-79" & gender_age_spec_0$Sex == "Men", "Cardiovascular"]` in men aged 30-39 and 70-79 respectively.
 
@@ -221,18 +219,6 @@ consistently around 2% (range `r pt_est_rng`).
 
 # Abstract
 
-```{r}
-## Add all labels back into to br table to allow index referencing for abstract
-br_reference <- br
-empty <- which(br_reference$Sex == "")
-br_reference$Sex[empty[1:(0.5*length(empty))]] <- "Female"
-empty <- which(br_reference$Sex == "")
-br_reference$Sex[empty] <- "Male"
-br_reference <- br_reference %>% 
-  filter(Age == "Total")
-
-```
-
 Objective
 ---------
 
@@ -240,18 +226,16 @@ To estimate the absolute treatment effects of newer P2Y~12~ inhibitors (ticagrel
 
 Methods
 ------
-We searched Ovid MEDLINE, EMBASE and the Cochrane Central Register of Controlled Trials (CENTRAL) for randomised controlled trials of oral P2Y~12~ inhibitors for stroke or ACS. Age and sex-specific mortality outcomes were obtained for all patients admitted to hospital with myocardial infarction in Scotland from 2006 to 2010 (prior to introduction of prasugrel or ticagrelor).
+We searched Ovid MEDLINE, EMBASE and the Cochrane Central Register of Controlled Trials (CENTRAL) for randomised controlled trials of oral P2Y~12~ inhibitors for acute stroke or ACS. Age and sex-specific mortality was obtained for all patients admitted to hospital with myocardial infarction in Scotland from 2006 to 2010 (prior to introduction of prasugrel or ticagrelor).
 
 Results
 -------
 
-From 7,148 articles, 9 fulfilled our inclusion criteria. Two stroke and 3 ACS trials compared clopidogrel to placebo, 1 stroke trial compared ticagrelor to aspirin, and 3 ACS trials compared newer P2Y12 inhibitors to clopidogrel.  In the latter comparison, the treatment rate ratio (RR) for major adverse cardiovascular events in men was `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). For the same outcome, across all 9 trials the sex-treatment interaction RR was `r inter_q["Pooled", "interaction"]`. Combining these estimates yielded a treatment RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
+From 9,277 articles, 9 fulfilled our inclusion criteria. Three trials compared newer P2Y~12~ inhibitors to clopidogrel in ACS, in which the treatment rate ratio (RR) for major adverse cardiovascular events in men was `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). For the same outcome, across all 9 trials the sex-treatment interaction RR was `r inter_q["Pooled", "interaction"]`. Combining these estimates yielded a treatment RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
 
 17,842 women and 27,818 men were admitted to hospital with myocardial infarction. Mortality was higher for women than men for all-cause (`r br_reference[br_reference$Sex == "Female", "All cause"]` versus `r br_reference[br_reference$Sex == "Male", "All cause"]`), cardiovascular (`r br_reference[br_reference$Sex == "Female", "Cardiovascular"]` versus `r br_reference[br_reference$Sex == "Male", "Cardiovascular"]`) and bleeding (`r br_reference[br_reference$Sex == "Female", "Bleeding"]` versus `r br_reference[br_reference$Sex == "Male", "Bleeding"]`) deaths.
 
 On applying the sex-specific RRs to this population, the absolute risk reduction for mortality at 1-year was similar for women and men for all-cause (`r arr_smry_0avd_non_cllps["Women", "Overall"]` versus `r arr_smry_0avd_non_cllps["Men", "Overall"]`), cardiovascular (`r arr_smry_0avd_non_cllps["Women", "Cardiovascular"]`) versus `r arr_smry_0avd_non_cllps["Men", "Cardiovascular"]`) and bleeding (`r arr_smry_0avd_non_cllps["Women", "Bleeding"]` versus `r arr_smry_0avd_non_cllps["Men", "Bleeding"]`) deaths.
-
-Despite finding a`r inter_p["re"]` probability that the relative treatment efficacy was lower in women than men, the probability that the absolute risk reduction for all-cause mortality was also lower was only `r arr_prob` .
 
 Conclusion
 ----------
@@ -260,25 +244,19 @@ Newer P2Y~12~ inhibitors may be slightly less efficacious in women than men (aro
 
 # Tables and Figures
 
-### Figure 2 Events and rates for MACE with figure
-```{r, fig.height=4, fig.width=7}
-forest_plot <- readRDS(file = "data/Final forest plot stratified and interaction.RDS")
-forest_plot
-tiff("figures/figure2.tiff", width = 14, height = 7, units = "in", res = 600, compression = "lzw")
-forest_plot
-dev.off()
-```
+### Figure 2 and 3
+
+See Script 8b. Had to edit in inkscape to add tables.
 
 
-## Figure 3 Age and sex specific baseline risks and absolute risk reduction
+## Figure 4 Age and sex specific baseline risks and absolute risk reduction
 
 ```{r, fig.height= 4, fig.width=10}
 load(file = "data/Bline, ARR plots.Rdata")
 tiff(filename = "figures/figure3_bline_arr.tiff", units = "in",
        height = 6, width = 14, compression = "lzw", res = 300)
 gridExtra::grid.arrange(bline + guides(colour = FALSE) ,
-                        arr_single +
-                          theme(axis.text.y = element_blank(), axis.title.y = element_blank()),
+                        arr_single,
                         layout_matrix = matrix(c(1,2), nrow = 1))
 dev.off()
 ```

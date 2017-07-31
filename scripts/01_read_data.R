@@ -12,11 +12,11 @@ library(glmmBUGS)
 source ("scripts/00_functions.r")
 
 # Read in csv files with data ----
-main <- read.csv (file = "data/P2Y12meta_combined_14Mar2016.csv", as.is = TRUE)
+main <- read.csv (file = "data/P2Y12meta_combined.csv", as.is = TRUE)
 names(main) <- tolower(names(main))
 names(main) <- gsub(".", "_", names(main), fixed = TRUE)
 
-bleed <- read.csv(file = "data/P2Y12_bleeding_2Mar2016.csv", as.is = TRUE)
+bleed <- read.csv(file = "data/P2Y12_bleeding.csv", as.is = TRUE)
 names(bleed) <- tolower(names(bleed))
 names(bleed) <- gsub(".", "_", names(bleed), fixed = TRUE)
 

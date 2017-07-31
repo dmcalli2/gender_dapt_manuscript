@@ -28,7 +28,7 @@ library(stringr)
 
 ## Medline search strategy
 
-(1946 to 12 March 2016)
+(1946 to July 2017)
 
 ```{r}
 PanderTable <- function (sheetname= "medline") {
@@ -41,7 +41,7 @@ PanderTable()
 
 ## Embase search strategy
 
-(1974 to 11 March 2016)
+(1974 to July 2017)
 
 ```{r}
 PanderTable("embase")
@@ -259,6 +259,7 @@ $$ arr = \sum_j arr_j$$
 The following assumptions were required for this analysis:-
 
 - Sex-treatment interactions are exchangeable between trials within the same drug-class
+- Sex-treatment interactions are homogeneous, on the relative scale, across follow-up time
 - Sex-specific relative treatment effects are transportable from the clinical trial populations to the target Scottish population
 - For the age-specific analysis that non-collapsability does not importantly affect the age-specific rate ratios
 - That the rate ratio for non-cardiovascular, non-bleeding events is null.

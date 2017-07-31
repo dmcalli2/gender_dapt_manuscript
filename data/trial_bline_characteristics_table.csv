@@ -1,24 +1,1 @@
-,CURE,COMMIT,CLARITY-TIMI 28,TRITON-TIMI 38,PLATO,CHANCE,TRILOGY ACS,SPS3
-Demographics,,,,,,,,
-Female Sex,38.5,27.8,19.7,26,28.4,33.8,35.9,37
-Age (mean),64.2,61.3,57.5,61,62,62.5,62,63
-Age (SD),11.3,11.85,10.3,,,,,
-Older,,>=70: 26,,>=75: 13,>=75: 15.5,>=71.5: 25,>=75: 22,
-Medical History,,,,,,,,
-Smoker,60.7,,50.2,38,35.9,43,23.4,20.5
-Diabetes Mellitus,22.6,,16.5,23,25,21.1,38.9,36.5
-Hypertension,58.8,43.3,43.4,64,65.4,65.7,80.4,75
-Hyperlipidaemia,,,32.6,56,46.7,11.1,59,
-Previous MI,32.2,8.3,9.1,18,20.5,1.9,44.1,
-Previous PCI,,,4.8,,13.4,,28.1,
-Previous CABG,,,,7.5,5.9,,15.4,
-Previous PCI or CABG ,17.9,,,,,,,
-Previous Stroke,,,,,,20,,15
-Previous TIA,,,,,,3.4,,
-Diagnosis,,,,,,,,
-Unstable Angina,74.9,,,,16.7,,32.5,
-NSTEMI,25.1,6.9,,,42.7,,67.5,
-Unstable Angina or NSTEMI,,,,74,,,,
-STEMI,,93.1,100,26,37.7,,,
-TIA,,,,,,27.9,,3
-Ischaemic Stroke,,,,,,72.1,,97
+,CURE,COMMIT,CLARITY-TIMI 28,TRITON-TIMI 38,PLATO,CHANCE,TRILOGY ACS,SPS3,SOCRATESDemographics,,,,,,,,,Female Sex,38.5,27.8,19.7,26,28.4,33.8,35.9,37,41.5Age (mean),64.2,61.3,57.5,61,62,62.5,62,63,65.9Age (SD),11.3,11.85,10.3,,,,,,41.6Older,,>=70: 26,,>=75: 13,>=75: 15.5,>=71.5: 25,>=75: 22,,Medical History,,,,,,,,,Smoker,60.7,,50.2,38,35.9,43,23.4,20.5,Diabetes Mellitus,22.6,,16.5,23,25,21.1,38.9,36.5,24.3Hypertension,58.8,43.3,43.4,64,65.4,65.7,80.4,75,73.7Hyperlipidaemia,,,32.6,56,46.7,11.1,59,,38.1Previous MI,32.2,8.3,9.1,18,20.5,1.9,44.1,,4.2Previous PCI,,,4.8,,13.4,,28.1,,Previous CABG,,,,7.5,5.9,,15.4,,Previous PCI or CABG ,17.9,,,,,,,,Previous Stroke,,,,,,20,,15,12.1Previous TIA,,,,,,3.4,,,6.5Diagnosis,,,,,,,,,Unstable Angina,74.9,,,,16.7,,32.5,,NSTEMI,25.1,6.9,,,42.7,,67.5,,Unstable Angina or NSTEMI,,,,74,,,,,STEMI,,93.1,100,26,37.7,,,,TIA,,,,,,27.9,,3,26.8Ischaemic Stroke,,,,,,72.1,,97,73.2

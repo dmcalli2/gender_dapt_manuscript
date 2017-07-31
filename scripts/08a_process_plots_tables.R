@@ -5,6 +5,7 @@ library(ggplot2)
 library(tidyverse)
 library(stringr)
 library(rjags)
+library(ggthemes)
 
 
 ## Load in model results (inter_q)
@@ -91,7 +92,7 @@ load("synth_smry/baseline risks with data.Rdata")
 bline_data <- y_chk 
 bline_data$age <- paste0(bline_data$age, "0-", bline_data$age, "9")
 bline_data$age <- factor(bline_data$age, levels = unique((bline_data$age)))
-bline_data$gender <- factor(bline_data$gender, 0:1, labels = c("Women", "Men"))
+bline_data$gender <- factor(bline_data$gender, 1:0, labels = c("Men", "Women"))
 bline_data$wrap <- "Baseline risk"
 bline_data[ , c("est", "lci", "uci")] <- lapply(bline_data[, c("est", "lci", "uci")], function(x) x/ bline_data$n)
 
@@ -102,7 +103,9 @@ bline <- ggplot(filter(bline_data, otype == "cv"),
 #  coord_flip() +
   scale_y_continuous("Risk (%) (95% CI)", labels = function(x) format(100*x, digits = 1, nsmall = 1)) +
   scale_x_discrete("Age (years)") +
-  facet_wrap(~wrap)
+  facet_wrap(~wrap)  +
+  scale_color_colorblind(name = NULL) +
+  theme_classic(base_size = 14)
 
 ## ARR
 MakeArrData <- function (analysis_name){
@@ -115,6 +118,7 @@ MakeArrData <- function (analysis_name){
   gender_age_spec[, c("lci", "est", "uci")] <- 
     lapply(gender_age_spec[, c("lci", "est", "uci")], as.double)
   gender_age_spec$age <- factor(gender_age_spec$age, levels = (unique(br$age)))
+  gender_age_spec$gender <- factor(gender_age_spec$gender, levels = c("Men", "Women"))
   gender_age_spec$analysis <- analysis_name
   gender_age_spec
 }
@@ -142,7 +146,7 @@ arr_data$bleeding_rr <- paste0((100+ as.integer(arr_data$bleeding_rr))/100, "-fo
 arr_data <- arr_data %>% filter(non_collapse != "avdnoncllps") %>%
   select(-non_collapse)
 # Make string for effect estimate for interaction
-pooled_string <-paste0(inter_q["50%", "re"], " (95%CI", inter_q["2.5%", "re"], " to ", inter_q["97.5%", "re"], ")")
+pooled_string <-paste0(inter_q["50%", "re"], " (95%CI ", inter_q["2.5%", "re"], " to ", inter_q["97.5%", "re"], ")")
 arr_data$mace_rr <- ifelse(arr_data$mace_rr == "nullmace", "No interaction for MACE", 
                            paste0("Interaction ", pooled_string, " for MACE") )
 arr_plot <- ggplot(filter(arr_data, otype == "MACE"), 
@@ -151,9 +155,9 @@ arr_plot <- ggplot(filter(arr_data, otype == "MACE"),
   geom_errorbar(position = position_dodge(width = 0.5)) +
   geom_hline(yintercept = 0, linetype = "dashed")+
   facet_grid(bleeding_rr ~ mace_rr) +
-#  coord_flip() +
   scale_y_continuous("Absolute risk reduction (%) (95% CI)") +
-  scale_color_discrete("")
+  scale_color_colorblind(name = NULL) +
+  theme_classic(base_size = 14)
 
 # Total plot
 total_plot <- arr_plot %+% filter(arr_data, otype == "Total")
