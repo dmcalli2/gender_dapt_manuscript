@@ -1,23 +1,15 @@
 ---
 title: "Supplementary appendix"
 output:
-<<<<<<< HEAD
-=======
-  word_document:
-    toc: yes
->>>>>>> 824ab5ee7c207499a980f47b365ce8fbb2deb999
   pdf_document:
     toc: yes
   html_document:
     number_sections: yes
     toc: yes
     toc_float: no
-<<<<<<< HEAD
   word_document:
     reference_docx: style.docx
     toc: yes
-=======
->>>>>>> 824ab5ee7c207499a980f47b365ce8fbb2deb999
 ---
 
 ```{r, setup, include=FALSE}
@@ -36,7 +28,7 @@ library(stringr)
 
 ## Medline search strategy
 
-(1946 to July 2017)
+(1946 to 12 March 2016)
 
 ```{r}
 PanderTable <- function (sheetname= "medline") {
@@ -49,7 +41,7 @@ PanderTable()
 
 ## Embase search strategy
 
-(1974 to July 2017)
+(1974 to 11 March 2016)
 
 ```{r}
 PanderTable("embase")
@@ -267,7 +259,6 @@ $$ arr = \sum_j arr_j$$
 The following assumptions were required for this analysis:-
 
 - Sex-treatment interactions are exchangeable between trials within the same drug-class
-- Sex-treatment interactions are homogeneous, on the relative scale, across follow-up time
 - Sex-specific relative treatment effects are transportable from the clinical trial populations to the target Scottish population
 - For the age-specific analysis that non-collapsability does not importantly affect the age-specific rate ratios
 - That the rate ratio for non-cardiovascular, non-bleeding events is null.
