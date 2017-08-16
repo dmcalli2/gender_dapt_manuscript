@@ -1,23 +1,9 @@
 ---
 title: "Supplementary appendix"
 output:
-<<<<<<< HEAD
-=======
-  word_document:
-    toc: yes
->>>>>>> 824ab5ee7c207499a980f47b365ce8fbb2deb999
-  pdf_document:
-    toc: yes
-  html_document:
-    number_sections: yes
-    toc: yes
-    toc_float: no
-<<<<<<< HEAD
-  word_document:
-    reference_docx: style.docx
-    toc: yes
-=======
->>>>>>> 824ab5ee7c207499a980f47b365ce8fbb2deb999
+  pdf_document: default
+  word_document: default
+date: "15 August 2017"
 ---
 
 ```{r, setup, include=FALSE}
@@ -38,7 +24,7 @@ library(stringr)
 
 (1946 to July 2017)
 
-```{r}
+```{r medline_search}
 PanderTable <- function (sheetname= "medline") {
   pander::pander(readxl::read_excel("Data/search_strategy.xlsx", sheet = sheetname), 
                  split.cell = 80, split.table = Inf, justify = "left")
@@ -51,13 +37,13 @@ PanderTable()
 
 (1974 to July 2017)
 
-```{r}
+```{r embase_search}
 PanderTable("embase")
 ```
 
 ## CENTRAL search
 
-```{r}
+```{r central_search}
 PanderTable("central")
 ```
 
@@ -79,7 +65,7 @@ K26.2, K27.2, K27.6, K28.2, K28.6, H35.6, H43.1, H45.0, I60, I62,
 169.0, 169.2, S06.4, S06.5, S06.6, I23.0, I31.2.
 
 # Trial participant baseline characteristics
-```{r}
+```{r bline_characteristics}
 trial_bline <- readr::read_csv("data/trial_bline_characteristics_table.csv")
 # trial_bline[] <- map(trial_bline, function (x) ifelse(is.na(x), "", x))
 names(trial_bline)[1] <- " "
@@ -95,10 +81,37 @@ knitr::kable(trial_bline[,5:8], row.names = TRUE)
 
 Presents percentages for categorical variables and means for continuous variables.
 
-# Sex-treatment interaction rate ratio and model information criteria for different models
+# Trial effect estimates for acute coronary syndrome patients with and without unstable angina
 
-Results for each model with model information criteria.
-```{r, "Model results and diagnostics"}
+## Relative treatment effect estimates (hazard ratios or risk ratios as available) for main treatment effects, stratified by diagnosis, as reported in original trial publications
+
+Trial|Exclude UA|Include UA|Overall
+-|---------|----------|-------
+CURE|Associated MI – 0.82|No Associated MI – 0.82|0.80 (0.72 to 0.90)
+PLATO|NSTEMI – 0.83, STEMI – 0.84|UA – 0.96|0.84 (0.77 to 0.92)
+TRITON-TIMI 38|STEMI – 0.81|UA or NSTEMI – 0.81|0.81 (0.73 to 0.90)
+TRILOGY ACS|NSTEMI – 0.91|UA – 0.92|0.91 (0.79 to 1.05)
+
+UA - unstable angina, STEMI - ST-elevation MI, NSTEMI - non-ST elevation MI
+
+# Sex-treatment interaction rate ratio
+
+## Rationale for modelling approach
+
+As described in the methods section. We fitted 3 models for the sex-treatment interaction rate ratio; an identical interaction for all trials within the drug-class, shared interactions between trials within the drug-class (using the assumption of exchangeability of covariate-treatment interactions within drug-class), and shared interactions between trials having stratified by indication/treatment.
+
+Rather than simply conduct a stratified model, we opted to include models which allowed information sharing between trials from different drug-classes as a measure to deal with the well-described problem that occurs when estimating covariate-treatment interactions; low sample size and event numbers, which results in poor precision, low power and an increased risk of false positives (Brookes et al, 2004).
+
+We therefore examined for evidence of sex-treatment interaction for P2Y12 inhibitor drugs not at the level of individual drugs, but rather at the level of the drug-class. Indeed, based on the putative mechanisms for a sex-treatment interaction, we would argue that a class-effect is more plausible than an agent-specific effect. For example, as we mention in the discussion, there may be differential thrombogenic tendencies and platelet-subendothelial interactions following antiplatelet therapy in women compared to men. If such a mechanism modifies the effectiveness of P2Y12-inhibitors, it is likely to be an effect common to the drug-class.
+
+Such an effect would also likely be common to acute stroke as well as acute myocardial infarction. These diseases also share similarities in terms of mechanisms of disease (atherothrombotic disease), mechanism of treatment (inhibition of P2Y12-inhibition), outcome of interest (major adverse cardiovascular events), major adverse events (bleeding) and patient populations (acutely ill patients recently admitted to hospital with a major cardiovascular illness), which is why we decided, a priori, to also include stroke trials.
+
+Moreover, for the best-fitting model, on which all subsequent analyses were based, we did not assume that the sex-treatment comparison was the same for all trials, but only that these were exchangeable, ie knowing the sex-treatment interaction for any trial within this drug-class tells us something about the likely size and magnitude of the sex-treatment interaction for each treatment comparison. 
+
+Overall, the effect of this information sharing was conservative, the sex-treatment interaction rate ratio for prasugrel/ticagrelor versus clopidogrel from the stratified model (RR 1.11) was shrunk towards the drug-class average in the shared model (RR 1.08). Importantly, the result was also robust to the choice of model.
+
+### Results for each model with model information criteria.
+```{r model_res_diagnostics, "Model results and diagnostics"}
 load("model_summaries/jags_samples_main.Rdata")
 load(file = "data/mace_dic.Rdata")
 
@@ -111,9 +124,15 @@ row.names(inter_dic) <- c("Identical", "Shared", "Shared, stratified by comparis
 knitr::kable(inter_dic)
 ```
 
+
+In an additional model,  we explored an approach which was intermediate, in terms of information sharing, between the shared and stratified models. In this more complex model trial was nested within treatment comparison (as with the stratified model), but a single shared prior was used across the three treatment comparison estimates. For simplicity, we did not present the results from this intermediate model as the estimate was similar to the more extreme shared and stratified models.
+
+For other examples of Bayesian approaches to analysing trial data which employ similar techniques see; Berry and Berry, 2004 who describe sharing information within physiological systems to detect adverse events, Dixon and Simon, 1991 and Jones et al., 2011 who describe sharing information in sub-group analyses for individual trials and meta-analyses, and Owen, Tincello and Keith, 2015 who demonstrate how information can be shared within drug-classes to improve precision in network meta-analysis.
+
+
 # Estimated sex-treatment interaction for each comparison obtained from the stratified model.
 
-```{r}
+```{r stratified_model}
 # clopidogrel_placebo_ACS clopidogrel_placebo_Stroke  prasugrel_clopidogrel_ACS 
 load(file = "jags_samples_main/random_tx_strat.Rdata")
 LINE.out <- LINE.out[ , varnames(LINE.out) %in% c("wd_delta[1]", "wd_delta[2]", "wd_delta[3]")]
@@ -131,7 +150,7 @@ knitr::kable(res)
 ACS - acute coronary syndrome, CI - 95% credible interval
 
 
-```{r}
+```{r arr_plots_load}
 library(ggplot2)
 load("data/Bline, ARR plots.Rdata")
 ```
@@ -142,7 +161,7 @@ Each small multiple represents the results from a model with different treatment
 The left-hand column shows the results from the sex-treatment interaction for MACE estimated from the data. The right-hand column shows the results from an assumed null interaction.
 The rows show the estimated treatment effect for a range of different sex-treatment interactions for bleeding. 
 
-```{r, fig.width=11, fig.height=16}
+```{r arr_plots_draw, fig.width=11, fig.height=16}
 arr_plot + scale_y_continuous("Absolute risk reduction, cardiovascular death (%) (95% CI)") +
   scale_x_discrete ("Age (years)")
 bleed_plot +
@@ -157,7 +176,7 @@ total_plot +
 
 We re-analysed data provided in the Lau et al paper, as well as a combination of data obtained in our systematic review as well as the Lau et al paper using the "shared" model as described in the main manuscript.
 
-```{r}
+```{r additional_trials}
 source("scripts/01_read_data.R")
 load("model_summaries/jags_samples_main.Rdata")
 inter_q <- as.data.frame(t(format(round(inter_q,2), nsmall = 2)))
@@ -230,7 +249,7 @@ $wd\_delta_c \sim N(0, 0.0001)$. The between trial variance was assumed to be id
 
 ### Summarising treatment effects
 
-Using samples from the posterior distributions from these models, treatment effects for men were added to the sex-treatment interation (both on the log-RR scale) to estimate the sex-specific log-RR for women. The resultant sex-specific log-RRs for women and men were summarised using non-linear least squares in R, assuming a t-distribution.
+Using samples from the posterior distributions from these models, treatment effects for men were added to the sex-treatment interaction (both on the log-RR scale) to estimate the sex-specific log-RR for women. The resultant sex-specific log-RRs for women and men were summarised using non-linear least squares in R, assuming a t-distribution.
 
 ## Baseline risk model
 
@@ -246,7 +265,7 @@ $$ log(p_{i,j})= \alpha0_j + \alpha1_j *age_i+ \alpha2_j*gender_i $$
 
 
 
-```{r}
+```{r baseline_data}
 br <- read.csv("data/baseline_risk_actual_data.csv", as.is = TRUE)
 br[, -7]
 ```
@@ -280,7 +299,7 @@ The following assumptions were required for this analysis:-
 
 ## Identical sex-treatment interaction model
 
-```{r}
+```{r identical_effets_model}
 a <- readr::read_lines("jags_code/fixed_effects.txt")
 print(noquote(a[-c(1, length(a))]
 ))
@@ -288,7 +307,7 @@ print(noquote(a[-c(1, length(a))]
 
 ## Shared sex-treatment interaction model
 
-```{r}
+```{r shared_effects_model}
 a <- readr::read_lines("jags_code/random_effects.txt")
 a <- a[-c(1, length(a))]
 print(noquote(a))
@@ -296,7 +315,7 @@ print(noquote(a))
 
 ## Shared sex-treatment interaction model, stratified by treatment comparison
 
-```{r}
+```{r stratified_effects_model}
 a <- readr::read_lines("jags_code/random_tx_strat.txt")
 print(noquote(a[-c(1, length(a))]))
 ```
@@ -304,5 +323,15 @@ print(noquote(a[-c(1, length(a))]))
 
 
 # References
+
+Berry, S. M. and Berry, D. A. (2004) ‘Accounting for Multiplicities in Assessing Drug Safety: A Three-Level Hierarchical Mixture Model’, Biometrics, 60(2), pp. 418–426. doi: 10.1111/j.0006-341X.2004.00186.x.
+
+Brookes ST, Whitely E, Egger M, et al. Subgroup analyses in randomized trials: risks of subgroup-specific analyses; power and sample size for the interaction test. J Clin Epidemiol 2004;57:229–36. doi:10.1016/j.jclinepi.2003.08.009
+
+Dixon, D. O. and Simon, R. (1991) ‘Bayesian Subset Analysis’, Biometrics, 47(3), pp. 871–881. doi: 10.2307/2532645.
+
+Jones HE, Ohlssen DI, Neuenschwander B, et al.Bayesian models for subgroup analysis in clinical trials. Clin Trials 2011;8:129–43. doi:10.1177/1740774510396933
+
+Owen RK, Tincello DG, Keith RA. Network Meta-Analysis: Development of a Three-Level Hierarchical Modeling Approach Incorporating Dose-Related Constraints. Value Health 2015;18:116–26. doi:10.1016/j.jval.2014.10.006.
 
 Turner, Rebecca M, Jonathan Davey, Mike J Clarke, Simon G Thompson, and Julian PT Higgins. “Predicting the Extent of Heterogeneity in Meta-Analysis, Using Empirical Data from the Cochrane Database of Systematic Reviews.” International Journal of Epidemiology 41, no. 3 (June 2012): 818–27. doi:10.1093/ije/dys041.

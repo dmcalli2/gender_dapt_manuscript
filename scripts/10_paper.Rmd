@@ -1,10 +1,10 @@
 ---
 title: "Final results, abstract"
 output:
-  word_document: default
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
   html_document: default
+  word_document: default
 ---
 
 ```{r, setup, include=FALSE}
@@ -230,13 +230,7 @@ We searched Ovid MEDLINE, EMBASE and the Cochrane Central Register of Controlled
 
 Results
 -------
-
-<<<<<<< HEAD
 From 9,277 articles, 9 fulfilled our inclusion criteria. Three trials compared newer P2Y~12~ inhibitors to clopidogrel in ACS, in which the treatment rate ratio (RR) for major adverse cardiovascular events in men was `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). For the same outcome, across all 9 trials the sex-treatment interaction RR was `r inter_q["Pooled", "interaction"]`. Combining these estimates yielded a treatment RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
-=======
-From 7,148 articles, 36 were reviewed in detail with 8 fulfilling our
-inclusion criteria. Trials compared clopdigorel to placebo in acute coronary syndrome (3 trials) and stroke (2 trials) or newer P2Y~12~ inhibitors to clopidogrel in acute coronary syndrome (3 trials). This provided a total of 109,570 randomised participants. Across all 8 trials, for major adverse cardiovascular events the sex-treatment interaction rate ratio (RR) was `r inter_q["Pooled", "interaction"]`, such that the probability that relative treatment efficacy for P2Y~12~ inhibitors is lower in women than in men is `r rr_prob_r`.
->>>>>>> 824ab5ee7c207499a980f47b365ce8fbb2deb999
 
 17,842 women and 27,818 men were admitted to hospital with myocardial infarction. Mortality was higher for women than men for all-cause (`r br_reference[br_reference$Sex == "Female", "All cause"]` versus `r br_reference[br_reference$Sex == "Male", "All cause"]`), cardiovascular (`r br_reference[br_reference$Sex == "Female", "Cardiovascular"]` versus `r br_reference[br_reference$Sex == "Male", "Cardiovascular"]`) and bleeding (`r br_reference[br_reference$Sex == "Female", "Bleeding"]` versus `r br_reference[br_reference$Sex == "Male", "Bleeding"]`) deaths.
 
