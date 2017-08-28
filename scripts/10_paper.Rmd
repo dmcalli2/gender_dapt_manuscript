@@ -102,7 +102,7 @@ On comparing the three models of sex-treatment interactions across all 9 trials 
 
 For this shared-effects model the rate ratio (RR) for the sex-treatment interaction was `r inter_q["Pooled", "50%"]` (95% Credible Interval (CI) `r inter_q["Pooled", "2.5%"]` to `r inter_q["Pooled", "97.5%"]`, Figure 3), indicating approximately 10% lower efficacy in women. Similar estimates for the sex-treatment interactions were found for the identical-effects (RR `r inter_q["Fixed", "50%"]`; 95% CI `r inter_q["Fixed", "2.5%"]` to `r inter_q["Fixed", "97.5%"]`) and independent-effects (RR for prasugrel/ticagrelor versus clopidogrel comparison `r inter_q["Pooled_tx_strat", "50%"]`; 95% CI `r inter_q["Pooled_tx_strat", "2.5%"]` to `r inter_q["Pooled_tx_strat", "97.5%"]`) models.
 
-The treatment effect RR in men for the 3 trials comparing prasugrel or ticagrelor to clopidogrel in ACS was  `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction estimate from the shared model yielded a RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`, `r women_p["re"]`).
+The treatment effect RR in men for the 3 trials comparing prasugrel or ticagrelor to clopidogrel in ACS was  `r men_q[1]` (95% CI `r men_q[2]` to `r men_q[3]`). Combining this estimate with the sex-treatment interaction estimate from the shared model yielded a RR in women of `r women_q["Pooled", "50%"]` (95% CI `r women_q["Pooled", "2.5%"]` to `r women_q["Pooled", "97.5%"]`).
 
 
 ```{r, "bleeding"}
@@ -239,7 +239,7 @@ On applying the sex-specific RRs to this population, the absolute risk reduction
 Conclusion
 ----------
 
-Newer P2Y~12~ inhibitors may be slightly less efficacious in women than men (around 1.1-fold lower), but the absolute risk reduction is similar in both sexes.
+Newer P2Y~12~ inhibitors may be slightly less efficacious in women than men, but the absolute risk reduction is similar in both sexes.
 
 # Tables and Figures
 
