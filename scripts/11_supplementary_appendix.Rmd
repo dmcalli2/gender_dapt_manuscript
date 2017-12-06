@@ -26,11 +26,10 @@ library(stringr)
 
 ```{r medline_search}
 PanderTable <- function (sheetname= "medline") {
-  pander::pander(readxl::read_excel("Data/search_strategy.xlsx", sheet = sheetname), 
-                 split.cell = 80, split.table = Inf, justify = "left")
+  knitr::kable(readxl::read_excel("Data/search_strategy.xlsx", sheet = sheetname))
 }
+
 PanderTable()
-# knitr::kable(readxl::read_excel("Data/search_strategy.xlsx", sheet = "medline"))
 ```
 
 ## Embase search strategy
