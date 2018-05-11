@@ -1,6 +1,6 @@
 ### Run all scripts
 
-## Run sex-treatment interaction models, note also runs reading in in data and creating JAGS models
+## Run sex-treatment interaction models, note also runs scripts 01 and 02 reading in data and creating JAGS models
 diagnostic <- FALSE
 source("scripts/03_Run_JAGS_models.R")
 
