@@ -1,8 +1,6 @@
 ---
 title: "Supplementary appendix"
-output:
-  pdf_document: default
-  word_document: default
+output: github_document
 date: "15 August 2017"
 ---
 

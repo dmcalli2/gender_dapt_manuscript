@@ -1,10 +1,6 @@
 ---
 title: "Final results, abstract"
-output:
-  html_document: default
-  html_notebook: default
-  pdf_document: default
-  word_document: default
+output: github_document
 ---
 
 ```{r, setup, include=FALSE}
@@ -258,4 +254,7 @@ gridExtra::grid.arrange(bline + guides(colour = FALSE) ,
                         arr_single,
                         layout_matrix = matrix(c(1,2), nrow = 1))
 dev.off()
+gridExtra::grid.arrange(bline + guides(colour = FALSE) ,
+                        arr_single,
+                        layout_matrix = matrix(c(1,2), nrow = 1))
 ```
